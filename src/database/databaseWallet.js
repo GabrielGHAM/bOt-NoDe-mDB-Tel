@@ -1,11 +1,11 @@
 const telegram = require("../schemas/telegramVw");
 
-module.exports = async function save(name, loyalty, reais, desagio) {
+module.exports = async function save(name, programa, valVw, desagio) {
 
   const s = new telegram({
     name: name,
-    loyalty: loyalty,
-    value: reais,
+    loyalty: programa,
+    value: valVw,
     desagio: desagio,
   });
 

@@ -1,5 +1,5 @@
-module.exports =  function optionName(name) {
-    const botInfo =  "COMPROmilhas_Bot"
+module.exports =  function optionName(ctx, name) {
+    const botInfo =  ctx.botInfo.username
   
     return {
       reply_markup: {

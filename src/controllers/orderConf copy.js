@@ -9,8 +9,6 @@ module.exports = async function orderConf(ctx) {
   
   while (lastMessageId >= 2) {
     try {
-      await ctx.telegram.deleteMessage(ctx.chat.id, lastMessageId - 10);
-      await ctx.telegram.deleteMessage(ctx.chat.id, lastMessageId - 9);
       await ctx.telegram.deleteMessage(ctx.chat.id, lastMessageId - 8);
       await ctx.telegram.deleteMessage(ctx.chat.id, lastMessageId - 7);
       await ctx.telegram.deleteMessage(ctx.chat.id, lastMessageId - 6);
@@ -22,7 +20,6 @@ module.exports = async function orderConf(ctx) {
       await ctx.telegram.deleteMessage(ctx.chat.id, lastMessageId);
       lastMessageId -= 1;
     } catch (error) {
-      console.error(error);
       break;
     }
   }  

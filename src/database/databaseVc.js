@@ -1,11 +1,11 @@
 const telegram = require("../schemas/telegramVc");
 
-module.exports = async function save(name, otherP, vcValue) {
+module.exports = async function save(name, vcProg, valVc) {
 
   const s = new telegram({
     name: name,
-    loyalty: otherP,
-    valorDaConta: vcValue
+    loyalty: vcProg,
+    valorDaConta: valVc
   });
 
   await s.save();

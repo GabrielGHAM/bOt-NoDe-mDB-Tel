@@ -1,14 +1,7 @@
-const Telegraf = require('telegraf');
-const WizardScene = require('telegraf/scenes/wizard');
-const cancelOrder = require("../controllers/closeScene");
-const getHiddenLink = require('../controllers/imgFormat');
 
-const superWizard = new WizardScene(
-    'comprar',
-    async (ctx) => {
-        ctx.wizard.state.data = {}        
-        await ctx.replyWithHTML(` Qual o programa?\n\n`, {
-            parse_mode: 'HTML',
+module.exports = function programas(ctx) {
+    ctx.reply(` Qual o programa?`,
+        {
             reply_markup: {
                 inline_keyboard: [
                     [
@@ -54,7 +47,7 @@ const superWizard = new WizardScene(
                     [
                         {
                             text: 'Avios Ibéria',
-                            callback_data: 'avios_Ibéria'
+                            callback_data: 'avios_iberia'
                         },
                         {
                             text: 'AeroMéxico',
@@ -73,55 +66,16 @@ const superWizard = new WizardScene(
                     ],
                     [
                         {
-                            text: 'American Airlines',
-                            callback_data: 'american_airlines'
+                            text: 'AmericanAirline',
+                            callback_data: 'american_airline'
                         },
                         {
                             text: 'Outros',
                             callback_data: 'outros'
                         }
                     ]
-                ],
-                resize_keyboard: true,
-                one_time_keyboard: true 
+                ]
             }
-        });
-        
-        return ctx.wizard.next();
-    },
-    async (ctx) => {
-        
-
-        // Aqui você pode verificar se a mensagem veio de um botão inline ou de texto
-        if (ctx.callbackQuery) {
-            ctx.session.username = ctx.callbackQuery.from.username;
-            ctx.wizard.state.data.programa = ctx.callbackQuery.data;
-            ctx.session.programa = ctx.callbackQuery.data.replace(/ /g, '_');
-        } else if (ctx.message.text) {
-            ctx.session.username = ctx.message.from.username
-            ctx.wizard.state.data.programa = ctx.message.text;
-            ctx.session.programa = ctx.message.text.replace(/ /g, '_');
         }
-        if (ctx.session.programa.toLowerCase().includes("fechar")) {
-            cancelOrder(ctx);
-            return;
-        }
-        const  programa = ctx.session.programa;        
-
-        if (programa.toLowerCase().includes('TAP_Voucher'.toLowerCase()) || programa.toLowerCase().includes('Azul_Voucher_RT'.toLowerCase()) || programa.toLowerCase().includes('Latam_Wallet'.toLowerCase())) {
-            ctx.scene.enter('vouWall');
-        } else if (programa.toLowerCase().includes('Outros'.toLowerCase())) {
-            ctx.scene.enter('outros');
-        } else if (programa.toLowerCase().includes('Volta_Cancelada'.toLowerCase())) {
-            ctx.scene.enter('voltaCan');
-        } else {
-            ctx.scene.enter('milhas');
-        }
-
-
-        
-        return ctx.wizard.next();
-    },
-)
-
-module.exports = superWizard;
+    );
+}

@@ -1,30 +1,14 @@
 const Telegraf = require('telegraf');
-function getHiddenLink(url, parse_mode = "markdown") {
-    const emptyChar = "‎"; // copied and pasted the char from https://emptycharacter.com/
-
-    switch (parse_mode) {
-        case "markdown":
-            return `[${emptyChar}](${url})`;
-        case "HTML":
-            return `<a href="${url}">${emptyChar}</a>`;
-        case "markdownV2":
-            return `[${emptyChar}](${url})`;
-        default:
-            throw new Error("invalid parse_mode");
-    }
-}
-
+const { Markup } = require('telegraf');
+const getHiddenLink = require('./imgFormat');
 
 module.exports = function startMenu(ctx, Markup, client) {
 
+        const userFirstName = ctx.chat.first_name;  
 
-    const userFirstName = ctx.message.from.first_name;
+    ctx.replyWithHTML(` Olá <b> ${userFirstName}</b> Seja bem vindo ao <b>@COMPROmilhas_Bot</b>\n` +
 
-
-    ctx.replyWithHTML(` <b>Olá  ${userFirstName} Seja bem vindo ao  @COMPROmilhas_Bot </b>\n` +
-   
-
-        `${getHiddenLink("https://i.imgur.com/ORHMwRY.jpg", "HTML")}`
+            `${getHiddenLink("HTML")}`
 
         ,
         Markup.inlineKeyboard([
@@ -36,7 +20,7 @@ module.exports = function startMenu(ctx, Markup, client) {
                 Markup.callbackButton('Oferta de compra', 'comprar'),
             ],
         ])
-
+             .resize()
             .extra()
 
     );
@@ -61,13 +45,13 @@ module.exports = function startMenu(ctx, Markup, client) {
             '*\\#compro \\#100k \\#latam \\#29,00 \\#3cpf\n\n*' +
             '*Vendeu?\\#venda realizada com sucesso @nomedovendedor \\#valor da negociação fechada \\#recomendaçãodovendedor*\n\n' +
             '*TODAS as transações de milhas realizadas dentro do grupo *\n\n' +
-            `***_Natan Amaral_***  ${getHiddenLink("https://i.imgur.com/ORHMwRY.jpg", "markdown")}`,
+            `***_Natan Amaral_***  ${getHiddenLink( "markdown")}`,
             {
                 parse_mode: "MarkdownV2",
                 reply_markup: {
                     inline_keyboard: [
                         [
-                            { text: 'Voltar', callback_data: 'menu' }
+                            { text: 'Voltar', callback_data: 'menuPrincipal' }
                         ]
                     ]
                 }
@@ -77,7 +61,7 @@ module.exports = function startMenu(ctx, Markup, client) {
     client.action('other', ctx => {
         ctx.editMessageText(
             `*  _${userFirstName}_\\, seja bem\\-vindo\\(a\\) ao menu de Outras opções\\! ***\n\n` +
-            `${getHiddenLink("https://i.imgur.com/ORHMwRY.jpg", "markdown")}`,
+            `${getHiddenLink( "markdown")}`,
             {
                 parse_mode: "MarkdownV2",
                 reply_markup: {
@@ -89,7 +73,7 @@ module.exports = function startMenu(ctx, Markup, client) {
                         ],
                         [{ text: 'Nossas REGRAS', callback_data: 'regras' }
                         ],
-                        [{ text: 'Voltar', callback_data: 'menu' }
+                        [{ text: 'Voltar', callback_data: 'menuPrincipal' }
                         ]
 
                     ]
@@ -98,12 +82,9 @@ module.exports = function startMenu(ctx, Markup, client) {
     });
 
 
-    client.action('menu', ctx => {
-
-
-        ctx.editMessageText(`<b>Olá ♔ ${userFirstName} Seja bem vindo ao  @COMPROmilhas_Bot </b>\n` +
-
-            `${getHiddenLink("https://i.imgur.com/ORHMwRY.jpg", "HTML")}`, {
+    client.action('menuPrincipal', ctx => {
+        ctx.editMessageText(`Olá <b>${userFirstName}</b> Seja bem vindo ao  <b>@COMPROmilhas_Bot </b>\n\n` +
+                            `${getHiddenLink( "HTML")}`, {
             parse_mode: "HTML",
             reply_markup: {
                 inline_keyboard: [
@@ -121,7 +102,7 @@ module.exports = function startMenu(ctx, Markup, client) {
     client.action('comprar', ctx => {
 
         ctx.scene.enter('comprar');
-
+    
     })
         ;
 }
