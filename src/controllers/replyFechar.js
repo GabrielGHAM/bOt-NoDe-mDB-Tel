@@ -1,11 +1,9 @@
 const { Markup } = require('telegraf');
 
 module.exports = async function replyClosedFunc(ctx, message) {
+  ctx.session.messageIds = ctx.session.messageIds ?? [];
 
-  return ctx.telegram.sendMessage(ctx.chat.id, message, {
-    parse_mode: 'Markdown',
-    reply_markup: Markup.inlineKeyboard([
-      Markup.callbackButton("Cancelar oferta", "close")
-    ])
+  return await ctx.replyWithHTML(message).then(({ message_id }) => {
+     ctx.session.messageIds.push(message_id);
   });
-};
+}

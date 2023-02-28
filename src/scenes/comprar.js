@@ -1,126 +1,61 @@
-const Telegraf = require('telegraf');
-const WizardScene = require('telegraf/scenes/wizard');
+const { Telegraf, Scenes } = require('telegraf');
 const cancelOrder = require("../controllers/closeScene");
 const getHiddenLink = require('../controllers/imgFormat');
-
-const superWizard = new WizardScene(
+const { startTimer, cancelTimer } = require('../controllers/startTimer');
+const bot = require('../../index');
+const replyClosed = require("../controllers/replyFechar");
+const superWizard = new Scenes.WizardScene(
     'comprar',
     async (ctx) => {
-        ctx.wizard.state.data = {}        
-        await ctx.replyWithHTML(` Qual o programa?\n\n`, {
+        cancelTimer(ctx);
+        startTimer(ctx);
+        ctx.wizard.state.data = {}
+        await ctx.editMessageText(` Qual o programa?\n\n`, {
             parse_mode: 'HTML',
             reply_markup: {
                 inline_keyboard: [
-                    [
-                        {
-                            text: 'Smiles',
-                            callback_data: 'smiles'
-                        },
-                        {
-                            text: 'Smiles Teto Diamante',
-                            callback_data: 'smiles_diamante'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'TAP',
-                            callback_data: 'tap'
-                        },
-                        {
-                            text: 'TAP Voucher',
-                            callback_data: 'tap_voucher'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Latam Wallet',
-                            callback_data: 'latam_wallet'
-                        },
-                        {
-                            text: 'Latam',
-                            callback_data: 'latam'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Azul Voucher RT',
-                            callback_data: 'azul_voucher'
-                        },
-                        {
-                            text: 'Azul Interline',
-                            callback_data: 'azul_interline'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Avios Ibéria',
-                            callback_data: 'avios_Ibéria'
-                        },
-                        {
-                            text: 'AeroMéxico',
-                            callback_data: 'aeromexico'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Volta Cancelada',
-                            callback_data: 'volta_cancelada'
-                        },
-                        {
-                            text: 'United',
-                            callback_data: 'united'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'American Airlines',
-                            callback_data: 'american_airlines'
-                        },
-                        {
-                            text: 'Outros',
-                            callback_data: 'outros'
-                        }
-                    ]
+                    [{ text: 'Smiles', callback_data: 'Smiles' }, { text: 'Smiles Teto Diamante', callback_data: 'Smiles_Teto_Diamante' }],
+                    [{ text: 'TAP', callback_data: 'TAP' }, { text: 'TAP Voucher', callback_data: 'TAP_Voucher' }],
+                    [{ text: 'Latam Wallet', callback_data: 'Latam_Wallet' }, { text: 'Latam', callback_data: 'Latam' }],
+                    [{ text: 'Azul Voucher RT', callback_data: 'Azul_Voucher_RT' }, { text: 'Azul Interline', callback_data: 'Azul_Interline' }],
+                    [{ text: 'Avios Ibéria', callback_data: 'Avios_Ibéria' }, { text: 'AeroMexico', callback_data: 'AeroMexico' }],
+                    [{ text: 'Volta Cancelada', callback_data: 'Volta_Cancelada' }, { text: 'United', callback_data: 'United' }],
+                    [{ text: 'American Airlines', callback_data: 'American_Airlines' }, { text: 'Outros', callback_data: 'Outros' }]
                 ],
                 resize_keyboard: true,
-                one_time_keyboard: true 
+                one_time_keyboard: true
             }
         });
-        
-        return ctx.wizard.next();
+
+        ctx.wizard.next()
     },
     async (ctx) => {
-        
-
-        // Aqui você pode verificar se a mensagem veio de um botão inline ou de texto
+        cancelTimer(ctx);
         if (ctx.callbackQuery) {
-            ctx.session.username = ctx.callbackQuery.from.username;
-            ctx.wizard.state.data.programa = ctx.callbackQuery.data;
-            ctx.session.programa = ctx.callbackQuery.data.replace(/ /g, '_');
-        } else if (ctx.message.text) {
-            ctx.session.username = ctx.message.from.username
-            ctx.wizard.state.data.programa = ctx.message.text;
-            ctx.session.programa = ctx.message.text.replace(/ /g, '_');
+            ctx.session.programa = ctx.callbackQuery.data;
         }
-        if (ctx.session.programa.toLowerCase().includes("fechar")) {
-            cancelOrder(ctx);
-            return;
+        if (ctx.message && ctx.message.text) {
+            if (/^[a-zA-Z\s]+$/.test(ctx.message.text)) {
+                ctx.session.programa = ctx.message.text.replace(/ /g, '_');
+            } else {
+                await replyClosed(ctx, 'Por favor, digite somente letras.');
+                return;
+            }
         }
-        const  programa = ctx.session.programa;        
-
-        if (programa.toLowerCase().includes('TAP_Voucher'.toLowerCase()) || programa.toLowerCase().includes('Azul_Voucher_RT'.toLowerCase()) || programa.toLowerCase().includes('Latam_Wallet'.toLowerCase())) {
-            ctx.scene.enter('vouWall');
-        } else if (programa.toLowerCase().includes('Outros'.toLowerCase())) {
-            ctx.scene.enter('outros');
-        } else if (programa.toLowerCase().includes('Volta_Cancelada'.toLowerCase())) {
-            ctx.scene.enter('voltaCan');
-        } else {
-            ctx.scene.enter('milhas');
+    // const programa = ctx.session.programa.toLowcase()
+    ctx.telegram.deleteMessage(ctx.chat.id, ctx.session.firstMessageId)
+        switch (ctx.session.programa.toLowerCase()) {
+            case 'tap_voucher':
+            case 'latam_wallet':
+            case 'azul_voucher_rt':
+                return ctx.scene.enter('vouWall');
+            case 'outros':
+                return ctx.scene.enter('outros');
+            case 'volta_cancelada':
+                return ctx.scene.enter('voltaCan');
+                default:
+                return ctx.scene.enter('milhas');                
         }
-
-
-        
-        return ctx.wizard.next();
     },
 )
 
